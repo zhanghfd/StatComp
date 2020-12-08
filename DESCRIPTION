@@ -9,7 +9,11 @@ Description: Several R and Rcpp function are included in this package for illust
 License: GPL (>= 2)
 Imports: Rcpp (>= 0.12.16), microbenchmark, knitr, rmarkdown
 LinkingTo: Rcpp
+<<<<<<< HEAD
 RoxygenNote: 7.1.1
+=======
+RoxygenNote: 7.0.2
+>>>>>>> 8cc41531dbf0541cb418a6d48478df3a80fdfdc2
 Encoding: UTF-8
 VignetteBuilder: knitr
 URL: http://github.com/zhanghfd/StatComp
