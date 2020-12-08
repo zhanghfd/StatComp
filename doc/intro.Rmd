@@ -1,0 +1,117 @@
+---
+title: "Introduction to StatComp"
+author: "Hong Zhang"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to StatComp}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Overview
+
+__StatComp__ is a simple R package developed to compare the performance of R and R++ (implemented through the R package _Rcpp_) for the 'Statistical Computing' course. Two functions are considered, namely, _gibbs_ (generate random nubers using Gibbs sampler) and _vacc_ (predicting the response using three variables: age, gender, and ily). For each function, both R and Rcpp versions are produced. Namely _gibbsR_ and  _vaccR_ for R and 'gibbC' and _vaccC_ for C++.
+
+The R package 'microbenchmark' can be used to benchmark the above R and C++ functions.
+
+## Benchmarking _vaccR_ and _vaccC_
+
+The source R code for _vaccR_ is as follows:
+```{r,eval=FALSE}
+function (age, female, ily) 
+{
+    p <- 0.25 + 0.3 * 1/(1 - exp(0.04 * age)) + 0.1 * ily
+    p <- p * ifelse(female, 1.25, 0.75)
+    p <- pmax(0, p)
+    p <- pmin(1, p)
+    p
+}
+```
+
+The above code involves 'ifelse', 'pmax', and 'pmin', which are known to be slow. On the other hand, the following _Rcpp_ code is much faster.
+
+```{r,eval=FALSE}
+double vacc3a(double age, bool female, bool ily){
+  double p = 0.25 + 0.3 * 1 / (1 - exp(0.04 * age)) + 0.1 * ily;
+  p = p * (female ? 1.25 : 0.75);
+  p = std::max(p, 0.0);
+  p = std::min(p, 1.0);
+  return p;
+}
+NumericVector vaccC(NumericVector age, LogicalVector female,
+                    LogicalVector ily) {
+  int n = age.size();
+  NumericVector out(n);
+  for(int i = 0; i < n; ++i) {
+    out[i] = vacc3a(age[i], female[i], ily[i]);
+  }
+  return out;
+}
+```
+
+In order to empirically benchmark _vaccR_ and _vaccC_, one generates 1,000 repicates of (age, female, ily), and save it in data{StatComp}. To load the file, one simply calls _data(data)_. The R code for benchmark _vaccR_ and _vaccC_ is as follows.
+
+```{r,eval=TRUE}
+library(StatComp)
+library(microbenchmark)
+data(data)
+attach(data)
+tm2 <- microbenchmark(
+  vR = vaccR(age,female,ily),
+  vC = vaccC(age,female,ily)
+)
+knitr::kable(summary(tm2)[,c(1,3,5,6)])
+```
+
+The above results show an evident computational speed gain of C++ against R.
+
+
+## Benchmarking _gibbsR_ and _gibbsC_
+
+The source R code for _vaccR_ is as follows:
+```{r,eval=FALSE}
+gibbsR <- function(N, thin) {
+  mat <- matrix(nrow = N, ncol = 2)
+  x <- y <- 0
+  for (i in 1:N) {
+    for (j in 1:thin) {
+      x <- rgamma(1, 3, y * y + 4)
+      y <- rnorm(1, 1 / (x + 1), 1 / sqrt(2 * (x + 1)))
+    }
+    mat[i, ] <- c(x, y)
+  }
+  mat
+}
+```
+
+The above R code involves two loops, which could be very slow even for R-3.01 or any higher version. The corresponding C++ code is as follows.
+
+```{r,eval=FALSE}
+NumericMatrix gibbsC(int N, int thin) {
+  NumericMatrix mat(N, 2);
+  double x = 0, y = 0;
+  for(int i = 0; i < N; i++) {
+    for(int j = 0; j < thin; j++) {
+      x = rgamma(1, 3, 1 / (y * y + 4))[0];
+      y = rnorm(1, 1 / (x + 1), 1 / sqrt(2 * (x + 1)))[0];
+    }
+    mat(i, 0) = x;
+    mat(i, 1) = y;
+  }
+  return(mat);
+}
+```
+
+The R code for benchmarking _gibbsR_ and _gibbsC_ is as follows.
+
+```{r,eval=TRUE}
+tm2 <- microbenchmark(
+  vR = gibbsR(1e4, 10),
+  vC = gibbsC(1e4, 10)
+)
+knitr::kable(summary(tm2)[,c(1,3,5,6)])
+```
+
+The results again show an evident computational speed gain of C++ against R.
+

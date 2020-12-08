@@ -1,0 +1,16 @@
+Package: StatComp
+Type: Package
+Title: Example functions for 'Statistical Computing' course
+Version: 1.0
+Date: 2019-12-25
+Author: Hong Zhang
+Maintainer: Hong Zhang <zhangh@ustc.edu.cn>
+Description: Several R and Rcpp function are included in this package for illustration. 
+License: GPL (>= 2)
+Imports: Rcpp (>= 0.12.16), microbenchmark, knitr, rmarkdown
+LinkingTo: Rcpp
+RoxygenNote: 7.1.1
+Encoding: UTF-8
+VignetteBuilder: knitr
+URL: http://github.com/zhanghfd/StatComp
+BugReports: http://github.com/zhanghfd/StatComp/issues
