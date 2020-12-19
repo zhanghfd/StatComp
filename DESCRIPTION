@@ -7,7 +7,7 @@ Author: Hong Zhang
 Maintainer: Hong Zhang <zhangh@ustc.edu.cn>
 Description: Several R and Rcpp function are included in this package for illustration. 
 License: GPL (>= 2)
-Imports: Rcpp (>= 0.12.16), microbenchmark, knitr, rmarkdown
+Imports: Rcpp, microbenchmark, knitr, rmarkdown
 LinkingTo: Rcpp
 RoxygenNote: 7.1.1
 Encoding: UTF-8

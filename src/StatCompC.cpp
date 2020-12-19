@@ -28,8 +28,6 @@ NumericMatrix gibbsC(int N, int thin) {
   }
   return(mat);
 }
-#include <Rcpp.h>
-using namespace Rcpp;
 
 double vacc3a(double age, bool female, bool ily){
   double p = 0.25 + 0.3 * 1 / (1 - exp(0.04 * age)) + 0.1 * ily;
